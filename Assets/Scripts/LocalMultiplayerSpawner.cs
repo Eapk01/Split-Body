@@ -39,6 +39,12 @@ public class LocalMultiplayerSpawner : MonoBehaviour
             );
         }
 
+        if(playerA == null || playerB == null)
+        {
+            print("Needs another controller!");
+            return;
+        }
+
         GameManager.Instance.RegisterPlayers(playerA.gameObject, playerB.gameObject);
     }
 }
