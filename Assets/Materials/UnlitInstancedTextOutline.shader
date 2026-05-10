@@ -16,8 +16,8 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
         Tags
         {
             "RenderPipeline" = "UniversalPipeline"
-            "RenderType" = "Opaque"
-            "Queue" = "Geometry"
+            "RenderType" = "Transparent"
+            "Queue" = "Transparent"
         }
 
         HLSLINCLUDE
@@ -38,6 +38,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             UNITY_DEFINE_INSTANCED_PROP(float, _OutlineWidth)
             UNITY_DEFINE_INSTANCED_PROP(float, _OutlineDepthOffset)
             UNITY_DEFINE_INSTANCED_PROP(float, _IntroAge)
+            UNITY_DEFINE_INSTANCED_PROP(float, _TextAlpha)
         UNITY_INSTANCING_BUFFER_END(TextOutlineProps)
 
         struct Attributes
@@ -93,13 +94,17 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
         half4 OutlineFragment(Varyings input) : SV_Target
         {
             UNITY_SETUP_INSTANCE_ID(input);
-            return UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _OutlineColor);
+            half4 color = UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _OutlineColor);
+            color.a *= UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _TextAlpha);
+            return color;
         }
 
         half4 TextFragment(Varyings input) : SV_Target
         {
             UNITY_SETUP_INSTANCE_ID(input);
-            return UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _BaseColor);
+            half4 color = UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _BaseColor);
+            color.a *= UNITY_ACCESS_INSTANCED_PROP(TextOutlineProps, _TextAlpha);
+            return color;
         }
         ENDHLSL
 
@@ -110,6 +115,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexRight
@@ -124,6 +130,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexLeft
@@ -138,6 +145,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexUp
@@ -152,6 +160,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexDown
@@ -166,6 +175,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexUpRight
@@ -180,6 +190,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexUpLeft
@@ -194,6 +205,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexDownRight
@@ -208,6 +220,7 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Cull Back
             ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex OutlineVertexDownLeft
@@ -220,8 +233,9 @@ Shader "Split Body/Text/Unlit Instanced Text Outline"
             Name "Text"
             Tags { "LightMode" = "UniversalForward" }
             Cull Back
-            ZWrite On
+            ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex TextVertex

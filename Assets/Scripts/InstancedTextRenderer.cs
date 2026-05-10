@@ -19,15 +19,35 @@ public class InstancedTextRenderer : MonoBehaviour
         public Mesh mesh;
     }
 
+    public struct GlyphPose
+    {
+        public Vector3 localOffset;
+        public Quaternion localRotation;
+        public float scale;
+        public float alpha;
+
+        public static GlyphPose Identity => new GlyphPose
+        {
+            localOffset = Vector3.zero,
+            localRotation = Quaternion.identity,
+            scale = 1f,
+            alpha = 1f
+        };
+    }
+
+    public delegate GlyphPose GlyphPoseProvider(int glyphIndex, char character, Vector3 baseLocalPosition);
+
     class BatchData
     {
         public readonly List<Matrix4x4> matrices = new();
         public readonly List<float> introAges = new();
+        public readonly List<float> alphas = new();
 
         public void Clear()
         {
             matrices.Clear();
             introAges.Clear();
+            alphas.Clear();
         }
     }
 
@@ -35,6 +55,7 @@ public class InstancedTextRenderer : MonoBehaviour
     static readonly int RiseDurationId = Shader.PropertyToID("_RiseDuration");
     static readonly int SettleStrengthId = Shader.PropertyToID("_SettleStrength");
     static readonly int IntroAgeId = Shader.PropertyToID("_IntroAge");
+    static readonly int TextAlphaId = Shader.PropertyToID("_TextAlpha");
 
     [Header("Text")]
     [TextArea]
@@ -81,6 +102,8 @@ public class InstancedTextRenderer : MonoBehaviour
             RefreshGlyphSpawnTimes(false);
         }
     }
+
+    public GlyphPoseProvider PoseProvider { get; set; }
 
     void Awake()
     {
@@ -164,7 +187,7 @@ public class InstancedTextRenderer : MonoBehaviour
             if (mesh == null)
                 continue;
 
-            AddGlyph(mesh, cursorX, cursorY, glyphIndex);
+            AddGlyph(mesh, cursorX, cursorY, glyphIndex, character);
             cursorX += GetGlyphAdvance(mesh) + letterSpacing;
             glyphIndex++;
         }
@@ -178,7 +201,7 @@ public class InstancedTextRenderer : MonoBehaviour
         return fallbackMesh;
     }
 
-    void AddGlyph(Mesh mesh, float cursorX, float cursorY, int glyphIndex)
+    void AddGlyph(Mesh mesh, float cursorX, float cursorY, int glyphIndex, char character)
     {
         Bounds bounds = mesh.bounds;
         Vector3 localPosition = new Vector3(
@@ -186,11 +209,14 @@ public class InstancedTextRenderer : MonoBehaviour
             cursorY - bounds.min.y * glyphScale.y,
             0f
         );
+        GlyphPose glyphPose = PoseProvider?.Invoke(glyphIndex, character, localPosition) ?? GlyphPose.Identity;
+        float glyphPoseScale = Mathf.Max(0f, glyphPose.scale);
+        localPosition += glyphPose.localOffset;
 
         Matrix4x4 localMatrix = Matrix4x4.TRS(
             localPosition,
-            Quaternion.identity,
-            glyphScale
+            glyphPose.localRotation,
+            glyphScale * glyphPoseScale
         );
 
         if (!batches.TryGetValue(mesh, out BatchData batch))
@@ -201,6 +227,7 @@ public class InstancedTextRenderer : MonoBehaviour
 
         batch.matrices.Add(transform.localToWorldMatrix * localMatrix);
         batch.introAges.Add(GetGlyphIntroAge(glyphIndex));
+        batch.alphas.Add(Mathf.Clamp01(glyphPose.alpha));
     }
 
     float GetLineWidth(string line)
@@ -257,20 +284,24 @@ public class InstancedTextRenderer : MonoBehaviour
 
         List<Matrix4x4> matrices = batch.matrices;
         List<float> introAges = batch.introAges;
+        List<float> alphas = batch.alphas;
 
         for (int start = 0; start < matrices.Count; start += MaxInstancesPerDraw)
         {
             int count = Mathf.Min(MaxInstancesPerDraw, matrices.Count - start);
             Matrix4x4[] chunk = new Matrix4x4[count];
             float[] ageChunk = new float[count];
+            float[] alphaChunk = new float[count];
             matrices.CopyTo(start, chunk, 0, count);
             introAges.CopyTo(start, ageChunk, 0, count);
+            alphas.CopyTo(start, alphaChunk, 0, count);
 
             properties.Clear();
             properties.SetFloat(RiseDistanceId, playIntroAnimation ? Mathf.Max(0f, riseDistance) : 0f);
             properties.SetFloat(RiseDurationId, Mathf.Max(0.0001f, riseDuration));
             properties.SetFloat(SettleStrengthId, Mathf.Max(0f, settleStrength));
             properties.SetFloatArray(IntroAgeId, ageChunk);
+            properties.SetFloatArray(TextAlphaId, alphaChunk);
 
             Graphics.DrawMeshInstanced(mesh, 0, material, chunk, count, properties);
         }

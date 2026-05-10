@@ -16,6 +16,11 @@ public class InstancedTextStreamer : MonoBehaviour
     bool isStreaming;
 
     public bool IsStreaming => isStreaming;
+    public float CharactersPerSecond
+    {
+        get => charactersPerSecond;
+        set => charactersPerSecond = Mathf.Max(1f, value);
+    }
 
     void Awake()
     {
