@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(InstancedTextRenderer))]
-[RequireComponent(typeof(InstancedTextStreamer))]
-public class FloatingTextFallEffect : MonoBehaviour
+public class FloatingTextEffect : MonoBehaviour
 {
     enum EffectState
     {
@@ -24,45 +23,52 @@ public class FloatingTextFallEffect : MonoBehaviour
     [Header("Text")]
     [SerializeField] string testText = "PERFECT";
     [SerializeField] bool playOnEnable;
+    [SerializeField] float charactersPerSecond = 24f;
 
-    [Header("Follow")]
-    [SerializeField] Transform followTarget;
-    [SerializeField] Vector3 followOffset = new Vector3(0f, 2f, 0f);
-    [SerializeField] bool followUntilFall = true;
+    [Header("Placement")]
+    [SerializeField] Vector3 targetOffset = new Vector3(0f, 2f, 0f);
 
     [Header("Timing")]
     [SerializeField] float holdDuration = 0.45f;
-    [SerializeField] float fallDuration = 0.7f;
-    [SerializeField] float fadeDuration = 0.35f;
-    [SerializeField] float perGlyphFallDelay = 0.025f;
-
-    [Header("Fall")]
-    [SerializeField] float gravity = 12f;
-    [SerializeField] Vector2 horizontalSpeedRange = new Vector2(0.15f, 0.55f);
-    [SerializeField] Vector2 upwardSpeedRange = new Vector2(0.4f, 1.1f);
-    [SerializeField] Vector2 tumbleSpeedRange = new Vector2(180f, 420f);
-    [SerializeField] float vanishScale = 0.6f;
-    [SerializeField] int randomSeed = 12345;
-
-    [Header("Ground")]
-    [SerializeField] bool useGroundRaycast = true;
-    [SerializeField] LayerMask groundMask = ~0;
-    [SerializeField] float groundRaycastHeight = 2f;
-    [SerializeField] float groundRaycastDistance = 8f;
-    [SerializeField] float groundYOffset = 0.02f;
-    [SerializeField] float fallbackGroundLocalY = -1.5f;
 
     [Header("Completion")]
     [SerializeField] bool disableOnComplete;
     [SerializeField] bool destroyOnComplete;
 
+    [HideInInspector] [SerializeField] float fallDuration = 0.7f;
+    [HideInInspector] [SerializeField] float fadeDuration = 0.35f;
+    float perGlyphFallDelay = 0.15f;
+    [HideInInspector] [SerializeField] float gravity = 12f;
+    [HideInInspector] [SerializeField] Vector2 horizontalSpeedRange = new Vector2(0.15f, 0.55f);
+    [HideInInspector] [SerializeField] Vector2 upwardSpeedRange = new Vector2(0.4f, 1.1f);
+    [HideInInspector] [SerializeField] Vector2 tumbleSpeedRange = new Vector2(180f, 420f);
+    [HideInInspector] [SerializeField] float vanishScale = 0.6f;
+    [HideInInspector] [SerializeField] int randomSeed = 12345;
+    [HideInInspector] [SerializeField] bool useGroundRaycast = true;
+    [HideInInspector] [SerializeField] LayerMask groundMask = ~0;
+    [HideInInspector] [SerializeField] float groundRaycastHeight = 2f;
+    [HideInInspector] [SerializeField] float groundRaycastDistance = 8f;
+    [HideInInspector] [SerializeField] float groundYOffset = 0.02f;
+    [HideInInspector] [SerializeField] float fallbackGroundLocalY = -1.5f;
+
     readonly List<GlyphFallState> glyphStates = new();
     InstancedTextRenderer textRenderer;
-    InstancedTextStreamer streamer;
     InstancedTextRenderer.GlyphPoseProvider poseProvider;
     EffectState state;
+    string fullText = string.Empty;
+    int visibleCharacterCount;
+    float nextCharacterTime;
     float stateStartTime;
     float groundLocalY;
+    bool fallAfterHold;
+
+    public bool IsPlaying => state != EffectState.Idle && state != EffectState.Done;
+    public bool IsStreaming => state == EffectState.Streaming;
+    public float CharactersPerSecond
+    {
+        get => charactersPerSecond;
+        set => charactersPerSecond = Mathf.Max(1f, value);
+    }
 
     void Awake()
     {
@@ -84,25 +90,35 @@ public class FloatingTextFallEffect : MonoBehaviour
             textRenderer.PoseProvider = null;
     }
 
+    void OnValidate()
+    {
+        charactersPerSecond = Mathf.Max(1f, charactersPerSecond);
+        holdDuration = Mathf.Max(0f, holdDuration);
+        fallDuration = Mathf.Max(0.01f, fallDuration);
+        fadeDuration = Mathf.Max(0.01f, fadeDuration);
+        perGlyphFallDelay = Mathf.Max(0f, perGlyphFallDelay);
+        gravity = Mathf.Max(0f, gravity);
+        vanishScale = Mathf.Max(0f, vanishScale);
+
+        if (destroyOnComplete)
+            disableOnComplete = false;
+    }
+
     void Update()
     {
         float now = Time.time;
 
-        if (ShouldFollowTarget())
-            transform.position = followTarget.position + followOffset;
-
         switch (state)
         {
             case EffectState.Streaming:
-                if (!streamer.IsStreaming)
-                    SetState(EffectState.Holding, now);
+                UpdateStreaming(now);
                 break;
             case EffectState.Holding:
-                if (now - stateStartTime >= Mathf.Max(0f, holdDuration))
-                    SetState(EffectState.Falling, now);
+                if (fallAfterHold && now - stateStartTime >= holdDuration)
+                    BeginFall(now);
                 break;
             case EffectState.Falling:
-                if (now - stateStartTime >= Mathf.Max(0f, fallDuration) + Mathf.Max(0.01f, fadeDuration) + GetMaxGlyphDelay())
+                if (now - stateStartTime >= fallDuration + fadeDuration + GetMaxGlyphDelay())
                     Complete();
                 break;
         }
@@ -110,28 +126,79 @@ public class FloatingTextFallEffect : MonoBehaviour
 
     public void Play(string text)
     {
+        PlayInternal(text, true);
+    }
+
+    public void PlayPersistent(string text)
+    {
+        PlayInternal(text, false);
+    }
+
+    void PlayInternal(string text, bool shouldFallAfterHold)
+    {
         EnsureComponents();
         glyphStates.Clear();
-        if (followTarget != null)
-            transform.position = followTarget.position + followOffset;
+        fullText = text ?? string.Empty;
+        visibleCharacterCount = 0;
+        nextCharacterTime = Time.time;
+        fallAfterHold = shouldFallAfterHold;
 
         ResolveGround();
         textRenderer.PoseProvider = poseProvider;
-        streamer.Stream(text);
+        textRenderer.Text = string.Empty;
+
+        if (fullText.Length == 0)
+        {
+            Complete();
+            return;
+        }
+
         SetState(EffectState.Streaming, Time.time);
     }
 
     public void Play(string text, Transform target)
     {
-        followTarget = target;
+        if (target != null)
+            transform.position = target.position + targetOffset;
+
         Play(text);
     }
 
     public void PlayAt(string text, Vector3 worldPosition)
     {
-        followTarget = null;
         transform.position = worldPosition;
         Play(text);
+    }
+
+    public void ShowImmediately(string text)
+    {
+        EnsureComponents();
+        fullText = text ?? string.Empty;
+        visibleCharacterCount = fullText.Length;
+        fallAfterHold = true;
+        textRenderer.Text = fullText;
+        SetState(EffectState.Holding, Time.time);
+    }
+
+    public void ShowPersistentImmediately(string text)
+    {
+        EnsureComponents();
+        fullText = text ?? string.Empty;
+        visibleCharacterCount = fullText.Length;
+        fallAfterHold = false;
+        textRenderer.Text = fullText;
+        SetState(EffectState.Holding, Time.time);
+    }
+
+    public void Clear()
+    {
+        EnsureComponents();
+        glyphStates.Clear();
+        fullText = string.Empty;
+        visibleCharacterCount = 0;
+        fallAfterHold = false;
+        textRenderer.Text = string.Empty;
+        SetState(EffectState.Idle, Time.time);
     }
 
     [ContextMenu("Begin Fall Now")]
@@ -141,13 +208,44 @@ public class FloatingTextFallEffect : MonoBehaviour
         glyphStates.Clear();
         ResolveGround();
         textRenderer.PoseProvider = poseProvider;
-        SetState(EffectState.Falling, Time.time);
+
+        if (!string.IsNullOrEmpty(fullText))
+            textRenderer.Text = fullText;
+
+        BeginFall(Time.time);
     }
 
     [ContextMenu("Test Fall Text")]
     public void TestFallText()
     {
         Play(testText);
+    }
+
+    void UpdateStreaming(float now)
+    {
+        float interval = 1f / charactersPerSecond;
+
+        while (state == EffectState.Streaming && now >= nextCharacterTime)
+        {
+            visibleCharacterCount++;
+            textRenderer.Text = fullText.Substring(0, visibleCharacterCount);
+
+            if (visibleCharacterCount >= fullText.Length)
+            {
+                SetState(EffectState.Holding, now);
+                break;
+            }
+
+            nextCharacterTime += interval;
+        }
+    }
+
+    void BeginFall(float now)
+    {
+        glyphStates.Clear();
+        ResolveGround();
+        textRenderer.PoseProvider = poseProvider;
+        SetState(EffectState.Falling, now);
     }
 
     InstancedTextRenderer.GlyphPose GetGlyphPose(int glyphIndex, char character, Vector3 baseLocalPosition)
@@ -165,8 +263,8 @@ public class FloatingTextFallEffect : MonoBehaviour
 
         Vector3 offset = CalculateFallOffset(glyphState, age, baseLocalPosition);
         Vector3 rotation = glyphState.angularVelocity * age;
-        float fadeT = Mathf.Clamp01((age - Mathf.Max(0f, fallDuration)) / Mathf.Max(0.01f, fadeDuration));
-        float scale = Mathf.Lerp(1f, Mathf.Max(0f, vanishScale), fadeT);
+        float fadeT = Mathf.Clamp01((age - fallDuration) / fadeDuration);
+        float scale = Mathf.Lerp(1f, vanishScale, fadeT);
 
         return new InstancedTextRenderer.GlyphPose
         {
@@ -180,7 +278,7 @@ public class FloatingTextFallEffect : MonoBehaviour
     Vector3 CalculateFallOffset(GlyphFallState glyphState, float age, Vector3 baseLocalPosition)
     {
         Vector3 offset = glyphState.velocity * age;
-        offset.y -= 0.5f * Mathf.Max(0f, gravity) * age * age;
+        offset.y -= 0.5f * gravity * age * age;
 
         float groundOffsetY = groundLocalY - baseLocalPosition.y;
         if (offset.y < groundOffsetY)
@@ -217,7 +315,7 @@ public class FloatingTextFallEffect : MonoBehaviour
             {
                 velocity = new Vector3(Mathf.Cos(angle) * horizontalSpeed, upwardSpeed, Mathf.Sin(angle) * horizontalSpeed),
                 angularVelocity = new Vector3(tumbleSpeed * tumbleSign, tumbleSpeed * 0.25f, tumbleSpeed * -tumbleSign * 0.35f),
-                delay = index * Mathf.Max(0f, perGlyphFallDelay)
+                delay = index * perGlyphFallDelay
             });
         }
     }
@@ -229,23 +327,17 @@ public class FloatingTextFallEffect : MonoBehaviour
         if (!useGroundRaycast)
             return;
 
-        Vector3 origin = transform.position + Vector3.up * Mathf.Max(0f, groundRaycastHeight);
-        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, Mathf.Max(0f, groundRaycastDistance), groundMask, QueryTriggerInteraction.Ignore))
+        Vector3 origin = transform.position + Vector3.up * groundRaycastHeight;
+        if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundRaycastDistance, groundMask, QueryTriggerInteraction.Ignore))
         {
             groundLocalY = transform.InverseTransformPoint(hit.point + Vector3.up * groundYOffset).y;
         }
     }
 
-    void SetState(EffectState nextState, float now)
-    {
-        state = nextState;
-        stateStartTime = now;
-    }
-
     void Complete()
     {
         SetState(EffectState.Done, Time.time);
-        streamer.ShowImmediately(string.Empty);
+        textRenderer.Text = string.Empty;
 
         if (destroyOnComplete)
         {
@@ -257,12 +349,10 @@ public class FloatingTextFallEffect : MonoBehaviour
         }
     }
 
-    bool ShouldFollowTarget()
+    void SetState(EffectState nextState, float now)
     {
-        if (!followUntilFall || followTarget == null)
-            return false;
-
-        return state == EffectState.Streaming || state == EffectState.Holding;
+        state = nextState;
+        stateStartTime = now;
     }
 
     float GetMaxGlyphDelay()
@@ -270,7 +360,7 @@ public class FloatingTextFallEffect : MonoBehaviour
         if (glyphStates.Count == 0)
             return 0f;
 
-        return (glyphStates.Count - 1) * Mathf.Max(0f, perGlyphFallDelay);
+        return (glyphStates.Count - 1) * perGlyphFallDelay;
     }
 
     float RandomRange(System.Random random, float min, float max)
@@ -289,9 +379,6 @@ public class FloatingTextFallEffect : MonoBehaviour
     {
         if (textRenderer == null)
             textRenderer = GetComponent<InstancedTextRenderer>();
-
-        if (streamer == null)
-            streamer = GetComponent<InstancedTextStreamer>();
 
         if (poseProvider == null)
             poseProvider = GetGlyphPose;

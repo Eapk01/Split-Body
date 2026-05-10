@@ -88,6 +88,9 @@ public class InstancedTextRenderer : MonoBehaviour
     readonly List<char> visibleGlyphs = new();
     readonly List<char> previousVisibleGlyphs = new();
     readonly List<float> glyphSpawnTimes = new();
+    readonly Matrix4x4[] matrixChunk = new Matrix4x4[MaxInstancesPerDraw];
+    readonly float[] introAgeChunk = new float[MaxInstancesPerDraw];
+    readonly float[] alphaChunk = new float[MaxInstancesPerDraw];
     MaterialPropertyBlock properties;
 
     public string Text
@@ -289,21 +292,18 @@ public class InstancedTextRenderer : MonoBehaviour
         for (int start = 0; start < matrices.Count; start += MaxInstancesPerDraw)
         {
             int count = Mathf.Min(MaxInstancesPerDraw, matrices.Count - start);
-            Matrix4x4[] chunk = new Matrix4x4[count];
-            float[] ageChunk = new float[count];
-            float[] alphaChunk = new float[count];
-            matrices.CopyTo(start, chunk, 0, count);
-            introAges.CopyTo(start, ageChunk, 0, count);
+            matrices.CopyTo(start, matrixChunk, 0, count);
+            introAges.CopyTo(start, introAgeChunk, 0, count);
             alphas.CopyTo(start, alphaChunk, 0, count);
 
             properties.Clear();
             properties.SetFloat(RiseDistanceId, playIntroAnimation ? Mathf.Max(0f, riseDistance) : 0f);
             properties.SetFloat(RiseDurationId, Mathf.Max(0.0001f, riseDuration));
             properties.SetFloat(SettleStrengthId, Mathf.Max(0f, settleStrength));
-            properties.SetFloatArray(IntroAgeId, ageChunk);
+            properties.SetFloatArray(IntroAgeId, introAgeChunk);
             properties.SetFloatArray(TextAlphaId, alphaChunk);
 
-            Graphics.DrawMeshInstanced(mesh, 0, material, chunk, count, properties);
+            Graphics.DrawMeshInstanced(mesh, 0, material, matrixChunk, count, properties);
         }
     }
 
