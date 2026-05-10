@@ -24,45 +24,45 @@ public class PlayerInteraction : MonoBehaviour
     }
 
     void Update()
-{
-    Collider[] hits = Physics.OverlapSphere(
-        transform.position, interactRadius, interactMask,
-        QueryTriggerInteraction.Collide);
-
-    current = null;
-    float closest = float.MaxValue;
-
-    foreach (var hit in hits)
     {
-        var interactable = hit.transform.GetComponentInParent<IInteractable>();
-        if (interactable == null) continue;
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position, interactRadius, interactMask,
+            QueryTriggerInteraction.Collide);
 
-        float dist = Vector3.Distance(
-            transform.position, hit.transform.position);
+        current = null;
+        float closest = float.MaxValue;
 
-        if (dist < closest)
+        foreach (var hit in hits)
         {
-            closest = dist;
-            current = interactable;
-        }
-    }
-    if (input.InteractPressed && current != null)
-{
-    Debug.Log("Interacting!");
-    current.Interact();
-    input.ConsumeInteract();
-}
-else if (input.InteractPressed)
-{
-    Debug.Log("Pressed but no current target!");
-}
+            var interactable = hit.transform.GetComponentInParent<IInteractable>();
+            if (interactable == null) continue;
 
-    if (input.InteractPressed && current != null)
+            float dist = Vector3.Distance(
+                transform.position, hit.transform.position);
+
+            if (dist < closest)
+            {
+                closest = dist;
+                current = interactable;
+            }
+        }
+        if (input.InteractPressed && current != null)
     {
+        Debug.Log("Interacting!");
         current.Interact();
         input.ConsumeInteract();
     }
-}
+    else if (input.InteractPressed)
+    {
+        Debug.Log("Pressed but no current target!");
+    }
+
+        if (input.InteractPressed && current != null)
+        {
+            current.Interact();
+            input.ConsumeInteract();
+        }
+    }
 
     void OnDrawGizmosSelected()
     {
