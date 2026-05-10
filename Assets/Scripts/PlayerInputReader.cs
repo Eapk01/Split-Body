@@ -37,6 +37,17 @@ public class PlayerInputReader : MonoBehaviour
     {
         SprintPressed = false;
     }
+    public bool InteractPressed { get; private set; }
+
+public void OnInteract(InputValue value)
+{
+    if (value.isPressed) InteractPressed = true;
+}
+
+public void ConsumeInteract()
+{
+    InteractPressed = false;
+}
 
     public void ConsumeJump()
     {
@@ -49,5 +60,6 @@ public class PlayerInputReader : MonoBehaviour
         Look = Vector2.zero;
         SprintHeld = false;
         JumpPressed = false;
+        InteractPressed = false;
     }
 }

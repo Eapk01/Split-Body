@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5704458842553373775}
   - component: {fileID: 1469392814909509292}
   - component: {fileID: 9078851393828336737}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 5595642601574640788}
   - component: {fileID: 4487722472100841332}
   - component: {fileID: 5257419219906141674}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -233,7 +233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2315075774273248870}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Pivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +266,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5115706558190313476}
-  m_Layer: 0
+  - component: {fileID: -5347252598755818076}
+  - component: {fileID: 2800930491686920662}
+  m_Layer: 7
   m_Name: Lever Shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -291,6 +293,49 @@ Transform:
   - {fileID: 6517472638142073007}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &-5347252598755818076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972713619208605008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93a6237a5bdb79e4ab48a76c521680a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Lever
+  IsOn: 0
+  extraAnimators:
+  - {fileID: 0}
+  OnActivate:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDeactivate:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!95 &2800930491686920662
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7972713619208605008}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d30a25daf8ef1244d82153cf3bbb6b4f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8708809741456951703
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,7 +348,7 @@ GameObject:
   - component: {fileID: 4322785153541186728}
   - component: {fileID: 7173649905711166281}
   - component: {fileID: 3690337002703836633}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -414,6 +459,10 @@ PrefabInstance:
     - target: {fileID: 1402307673382286306, guid: 1514aa810e6455b41a00e45316ffc5ed, type: 3}
       propertyPath: m_Name
       value: Shadow
+      objectReference: {fileID: 0}
+    - target: {fileID: 1402307673382286306, guid: 1514aa810e6455b41a00e45316ffc5ed, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8846536886044182328, guid: 1514aa810e6455b41a00e45316ffc5ed, type: 3}
       propertyPath: m_LocalPosition.x

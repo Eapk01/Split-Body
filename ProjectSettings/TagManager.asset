@@ -12,11 +12,11 @@ TagManager:
   - Water
   - UI
   - Ghost
-  - 
-  - 
-  - 
-  - 
-  - 
+  - GhostSolid
+  - ChildSolid
+  - Interactable
+  - GhostPlayer
+  - ChildPlayer
   - 
   - 
   - 
