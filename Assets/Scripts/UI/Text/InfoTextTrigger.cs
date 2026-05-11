@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 [RequireComponent(typeof(FloatingTextEffect))]
@@ -27,6 +28,9 @@ public class InfoTextTrigger : MonoBehaviour
     [Header("Facing")]
     [SerializeField] bool assignLookAtTarget = true;
 
+    [Header("Arabic Requester (Optional)")]
+    WordMeshLoader meshLoader;
+
     FloatingTextEffect textEffect;
     LookAtTarget lookAtTarget;
     Transform currentTarget;
@@ -37,6 +41,7 @@ public class InfoTextTrigger : MonoBehaviour
     {
         textEffect = GetComponent<FloatingTextEffect>();
         lookAtTarget = GetComponent<LookAtTarget>();
+        meshLoader = GetComponent<WordMeshLoader>();
     }
 
     void Start()
@@ -91,6 +96,12 @@ public class InfoTextTrigger : MonoBehaviour
     {
         if (isShown)
             return;
+
+        if (InstancedTextRenderer.IsArabicLine(text))
+        {
+            string[] words = WordMeshLoader.SplitWords(text);
+            meshLoader.Prefetch(words);
+        }
 
         textEffect.PlayPersistent(text);
         isShown = true;

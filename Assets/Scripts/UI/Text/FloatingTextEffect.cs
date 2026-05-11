@@ -209,8 +209,8 @@ public class FloatingTextEffect : MonoBehaviour
         ResolveGround();
         textRenderer.PoseProvider = poseProvider;
 
-        if (!string.IsNullOrEmpty(fullText))
-            textRenderer.Text = fullText;
+        // if (!string.IsNullOrEmpty(fullText))
+        //     textRenderer.Text = fullText;
 
         BeginFall(Time.time);
     }
