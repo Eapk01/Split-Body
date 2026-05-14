@@ -43,6 +43,7 @@ public class ThirdPersonMotor : MonoBehaviour
     Collider bodyCollider;
     PlayerInputReader input;
     string schema;
+    float pushSpeedMultiplier = 1f;
 
     Vector3 horizontalVelocity;
     float verticalVelocity;
@@ -113,7 +114,7 @@ public class ThirdPersonMotor : MonoBehaviour
         Vector3 desiredMove = GetCameraRelativeDirection(moveInput);
         MoveDirection = desiredMove;
 
-        float targetSpeed = IsSprint() ? sprintSpeed : walkSpeed;
+        float targetSpeed = (IsSprint() ? sprintSpeed : walkSpeed) * pushSpeedMultiplier;
         Vector3 targetHorizontalVelocity = desiredMove * targetSpeed;
 
         Vector3 currentHorizontalVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
@@ -331,6 +332,11 @@ public class ThirdPersonMotor : MonoBehaviour
     public void SetSchema(string schema)
     {
         this.schema = schema;
+    }
+
+    public void SetPushSpeedMultiplier(float multiplier)
+    {
+        pushSpeedMultiplier = Mathf.Clamp01(multiplier);
     }
 
     void OnDrawGizmosSelected()

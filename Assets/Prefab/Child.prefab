@@ -418,7 +418,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3331363211598093171}
-  - component: {fileID: 4211081556594046482}
   - component: {fileID: 4160037823911094363}
   - component: {fileID: 1623146787368070019}
   - component: {fileID: 6726330276422596735}
@@ -452,28 +451,6 @@ Transform:
   - {fileID: 8968728091260661069}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &4211081556594046482
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1624711048844476302}
-  m_Enabled: 0
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 32f3f94069b594a46b42293f699c3e9e, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &4160037823911094363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -561,7 +538,7 @@ CapsuleCollider:
     m_Bits: 64
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -2113,7 +2090,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8591885136970708983}
   m_Enabled: 1
-  m_Avatar: {fileID: 0}
+  m_Avatar: {fileID: 9000000, guid: 34a5ec75ffa3ff749a381a8ce5fbd4be, type: 3}
   m_Controller: {fileID: 9100000, guid: 32f3f94069b594a46b42293f699c3e9e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
@@ -2121,7 +2098,13 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
+    are already bound by a Humanoid avatar. These transforms can only be changed
+    by Humanoid clips.\n\tTransform 'DEF-shin.R.001'\n\tTransform 'DEF-foot.R'\n\tTransform
+    'DEF-shin.L'\n\tTransform 'DEF-shin.L.001'\n\tTransform 'hairfront.002.R'\n\tTransform
+    'DEF-toe.L'\n\tTransform 'DEF-spine.006'\n\tTransform 'DEF-shin.R'\n\tTransform
+    'DEF-forearm.L.001'\n\tTransform 'DEF-spine'\n\tand more ...\n\tFrom animation
+    clip 'GirlIdle'\n\tFrom animation clip 'GirlWalk'\n\tFrom animation clip 'GirlRun'"
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
