@@ -46,22 +46,16 @@ public class PlayerInteraction : MonoBehaviour
                 current = interactable;
             }
         }
-        if (input.InteractPressed && current != null)
-    {
-        Debug.Log("Interacting!");
-        current.Interact();
-        input.ConsumeInteract();
-    }
-    else if (input.InteractPressed)
-    {
-        Debug.Log("Pressed but no current target!");
-    }
+        if (!input.InteractPressed)
+            return;
 
-        if (input.InteractPressed && current != null)
+        if (current != null)
         {
+            Debug.Log("Interacting!");
             current.Interact();
-            input.ConsumeInteract();
         }
+
+        input.ConsumeInteract();
     }
 
     void OnDrawGizmosSelected()

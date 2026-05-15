@@ -13,7 +13,6 @@ public class ThirdPersonCameraFollow : MonoBehaviour
     [SerializeField] float targetHeightOffset = 1.6f;
 
     [Header("Look")]
-    float mouseSensitivity = 0.15f;
     float controllerSensitivity = 1;
     [SerializeField] float minPitch = -30f;
     [SerializeField] float maxPitch = 70f;

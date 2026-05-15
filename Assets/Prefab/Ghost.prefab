@@ -774,7 +774,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3331363211598093171}
-  - component: {fileID: 4211081556594046482}
   - component: {fileID: 4160037823911094363}
   - component: {fileID: 1623146787368070019}
   - component: {fileID: 6726330276422596735}
@@ -810,28 +809,6 @@ Transform:
   - {fileID: 8020745590829029619}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &4211081556594046482
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1624711048844476302}
-  m_Enabled: 0
-  m_Avatar: {fileID: 9000000, guid: b29b2128ad71ad649baeac918d2d5a2e, type: 2}
-  m_Controller: {fileID: 9100000, guid: 1a87b9fd2842e4e48b5ac464df22c859, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &4160037823911094363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1017,7 +994,7 @@ MonoBehaviour:
   interactRadius: 2
   childSolidLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   ghostSolidLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -2499,7 +2476,7 @@ PrefabInstance:
     - target: {fileID: 4320098735860348617, guid: 34a5ec75ffa3ff749a381a8ce5fbd4be, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 86fbdb2a820f5cf4ea3044a7bbdfe696, type: 2}
+      objectReference: {fileID: 2100000, guid: 978701dd8d505d74f9cc211c90f9e9f7, type: 2}
     - target: {fileID: 9155276747989737948, guid: 34a5ec75ffa3ff749a381a8ce5fbd4be, type: 3}
       propertyPath: m_CastShadows
       value: 0
@@ -2535,7 +2512,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7584603744344245985}
   m_Enabled: 1
-  m_Avatar: {fileID: 0}
+  m_Avatar: {fileID: 9000000, guid: 34a5ec75ffa3ff749a381a8ce5fbd4be, type: 3}
   m_Controller: {fileID: 9100000, guid: 32f3f94069b594a46b42293f699c3e9e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0

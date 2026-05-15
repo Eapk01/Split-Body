@@ -23,9 +23,6 @@ public class ShadowProjector : MonoBehaviour
     [Header("Light Edge Detection")]
     [SerializeField] float edgeThreshold = 0.9f;
 
-    [Range(0f, 1f)]
-    [SerializeField] float edgeFade = 0f;
-
     [Header("Optional")]
     [SerializeField] bool rotateShadow = true;
 

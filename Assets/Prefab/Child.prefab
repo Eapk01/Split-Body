@@ -624,13 +624,13 @@ MonoBehaviour:
   interactRadius: 2
   childSolidLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   ghostSolidLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 128
   interactableLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
 --- !u!1 &1786159717502877978
 GameObject:
   m_ObjectHideFlags: 0
@@ -2098,13 +2098,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
-    are already bound by a Humanoid avatar. These transforms can only be changed
-    by Humanoid clips.\n\tTransform 'DEF-shin.R.001'\n\tTransform 'DEF-foot.R'\n\tTransform
-    'DEF-shin.L'\n\tTransform 'DEF-shin.L.001'\n\tTransform 'hairfront.002.R'\n\tTransform
-    'DEF-toe.L'\n\tTransform 'DEF-spine.006'\n\tTransform 'DEF-shin.R'\n\tTransform
-    'DEF-forearm.L.001'\n\tTransform 'DEF-spine'\n\tand more ...\n\tFrom animation
-    clip 'GirlIdle'\n\tFrom animation clip 'GirlWalk'\n\tFrom animation clip 'GirlRun'"
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
