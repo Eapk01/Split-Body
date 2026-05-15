@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class PauseMenu : MonoBehaviour
 {
     public static bool IsPaused = false;
 
     [SerializeField] GameObject pauseMenuUI;
+    [SerializeField] GameObject first;
 
     void Update()
     {
@@ -33,6 +35,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         IsPaused = true;
+        EventSystem.current.SetSelectedGameObject(first);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
