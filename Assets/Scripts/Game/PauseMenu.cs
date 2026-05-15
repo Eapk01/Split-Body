@@ -9,7 +9,7 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) ||
+        if (UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame ||
             UnityEngine.InputSystem.Gamepad.current != null &&
             UnityEngine.InputSystem.Gamepad.current.startButton.wasPressedThisFrame)
         {
@@ -23,6 +23,9 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
         IsPaused = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     void Pause()
@@ -30,6 +33,9 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         IsPaused = true;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void Restart()

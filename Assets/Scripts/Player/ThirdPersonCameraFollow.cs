@@ -46,7 +46,7 @@ public class ThirdPersonCameraFollow : MonoBehaviour
 
     void LateUpdate()
     {
-        if (target == null || input == null)
+        if (target == null || input == null || PauseMenu.IsPaused)
             return;
 
         HandleLook();
